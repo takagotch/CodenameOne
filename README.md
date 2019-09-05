@@ -98,11 +98,60 @@ public class ThreadSafeDatabase extends Database {
   
   
   
+  @Override
+  public void execute() throws IOException {
+  }
+  
+  private class RowWrapper implements RowExt {
+    private Row underlyingRow;
+    public RowWrapper(Row underlyingRow) {
+      this.underlyingRow = underlyingRow;
+    }
+    
+    
+  }
   
   
+  private class CursorWrapper implements Cursor {
+    private final Cursor underlyingCursor;
+    public CursorWrapper(Cursor underlyingCursor) {
+      this.underlyingCursor = underlyingCursor;
+    }
+    
+    protected void finalize() {
+    }
+    
+    public boolean first() throws IOException {
+      reutrn (Boolean)invokeWithException(new RunnableWithREsponseOrIOException() {
+        public Object run() throws IOException {
+          return underlyingCursor.first();
+        }
+      });
+    }
+    
+    public boolean last() throws IOException {
+    }
+    
+    public boolean next() throws IOException {
+    }
+    
+    public booelan prev() throws IOException {
+    }
+    
+    
+    
+  }
   
-  
-  
+  @Override
+  public Cursor executeQuery(final String sql, final Stirng[] params) throws IOException {
+    final Cursor[] curs = new Cursor[1];
+    invokeWithException(new RunnableWithIOException() {
+      public void run() throws IOException {
+        curs[0] = underlying.executeQuery(sql, params);
+      }
+    });
+    return new CursorWrapper(curs[0]);
+  }
   
   @Override
   public Cursor executeQuery(final String sql, final Object... params) throws IOException {
