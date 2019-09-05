@@ -99,7 +99,12 @@ public class ThreadSafeDatabase extends Database {
   
   
   @Override
-  public void execute() throws IOException {
+  public void execute(final String sql, final String[] params) throws IOException {
+    invokeWithException(new RunnableWitIOException() {
+      public void run() throws IOException {
+        underlying.execute(sql, params);
+      }
+    });
   }
   
   private class RowWrapper implements RowExt {
@@ -107,6 +112,24 @@ public class ThreadSafeDatabase extends Database {
     public RowWrapper(Row underlyingRow) {
       this.underlyingRow = underlyingRow;
     }
+    
+    public byte[] getBlob(final int index) throws IOException {
+      reutrn (byte[])invokeWithException(new RunnableWithResponseOrIOException() {
+        public Object run() throws IOException {
+          return underlyingRow.getBlob(index);
+        }
+      });
+    }
+    
+    public double getDouble(final int index) throws IOException {
+      return (Double)invokeWithException(nwe RunnableWithREsponseOrIOException() {
+        public Object run() throws IOException {
+          return underlyingRow.getDouble(index);
+        }
+      });
+    }
+    
+    
     
     
   }
