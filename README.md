@@ -97,6 +97,24 @@ public class ThreadSafeDatabase extends Database {
   
   
   
+  
+  
+  
+  
+  
+  
+  
+  @Override
+  public Cursor executeQuery(final String sql, final Object... params) throws IOException {
+    final Cursor[] curs = new Cursor{1];
+    invokeWithException(new RunnableWithIOException() {
+      public void run() throws IOException {
+        curs[0] = underlying.executeQuery(sql, params);
+      }
+    });
+    return new CursorWrapper(curs[0]);
+  }
+  
   @Override
   public void execute(final String sql, final Object... params) throws IOException {
     invokeWithException(new RunnableWithIOException() {
